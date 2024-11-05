@@ -1,0 +1,64 @@
+modelbaseline_mpluscode <- mplusObject(
+  MODEL = "
+i s | y0 y1 y2 y6 y12 y18 y24 y30 y36 AT t0 t1 t2 t6 t12 t18 t24 t30 t36;
+i s | y48 y60 AT  t48 t60;
+p  BY  y0@0 y1@1 y2@1 y6@1 y12@1 y18@1 y24@1 y30@1 y36@1 y48@1 y60@1;
+r  BY  y0@0 y1@0 y2@1 y6@1 y12@1 y18@1 y24@1 y30@1 y36@1 y48@1 y60@1;
+lr BY  y0@0 y1@0 y2@0 y6@.181 y12@.524 y18@1 y24@1 y30@1 y36@1 y48@1 y60@1;
+
+[i*57.605] (i);
+[s*-1.03] (s);
+[p*-.453] (p);
+[r*1.299] (r);
+[lr*1.772] (lr);
+p@0;
+r@0;
+lr*7.426;
+s*1.087;
+s with i*.977;
+i with p@0;
+i with r@0;
+i with lr@0;
+s with p@0;
+s with r@0;
+s with lr*-1.815;
+
+r with p@0;
+lr with p@0 ;
+lr with r@0 ;
+
+s ON delyes*-.302 (del_s);
+s ON cage crace cfem cedu ccci cvasc cgastro ;
+p ON delyes*-1.199 (del_p);
+p ON cage crace cfem cedu ccci cvasc cgastro ;
+r ON delyes*1.09 (del_r);
+r ON cage crace cfem cedu ccci cvasc cgastro ;
+lr ON delyes*-.208 (del_lr);
+lr ON cage crace cfem cedu ccci cvasc cgastro ;
+i ON cage crace cfem cedu ccci cvasc cgastro ; 
+
+delyes ON i*-.077;
+delyes ON cage crace cfem cedu ccci cvasc cgastro ; 
+
+
+",
+  
+
+  usevariables = colnames(mplus_data),
+  
+  VARIABLE = "idvariable = mplusid;
+            tscores = t0 t1 t2 t6 t12 t18 t24 t30 t36 t48 t60;
+            CATEGORICAL ARE delyes;",
+  
+  OUTPUT = "CINTERVAL;
+          TECH4;",
+  
+  ANALYSIS = "ESTIMATOR = MLR;
+            TYPE = RANDOM;
+            INTEGRATION=MONTECARLO;",
+  
+  rdata = mplus_data
+  
+)
+
+modelbaseline_output <- mplusModeler(modelbaseline_mpluscode, modelout = "modelbaseline.inp", run = TRUE)
