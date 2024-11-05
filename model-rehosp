@@ -1,0 +1,195 @@
+modelrehosp_mpluscode <- mplusObject(
+  MODEL = "
+i s | y0 y1 y2 y6 y12 y18 y24 y30 y36 AT t0 t1 t2 t6 t12 t18 t24 t30 t36;
+i s | y48 y60 AT  t48 t60;
+p  BY  y0@0 y1@1 y2@1 y6@1 y12@1 y18@1 y24@1 y30@1 y36@1 y48@1 y60@1;
+r  BY  y0@0 y1@0 y2@1 y6@1 y12@1 y18@1 y24@1 y30@1 y36@1 y48@1 y60@1;
+lr BY  y0@0 y1@0 y2@0 y6@.181 y12@.524 y18@1 y24@1 y30@1 y36@1 y48@1 y60@1;
+
+[i*57.603] (i);
+[s*-.98] (s);
+[p*-.348] (p);
+[r*1.095] (r);
+[lr*1.927] (lr);
+p@0;
+r@0;
+lr*4.638;
+s with i*.875;
+i with p@0;
+i with r@0;
+i with lr@0;
+s with p@0;
+s with r@0;
+s with lr*-2.01;
+
+r with p@0;
+lr with p@0 ;
+lr with r@0 ;
+
+s ON delyes*-.302 (del_s);
+s ON cage crace cfem cedu ccci cvasc cgastro ;
+p ON delyes*-1.199 (del_p);
+p ON cage crace cfem cedu ccci cvasc cgastro ;
+r ON delyes*1.09 (del_r);
+r ON cage crace cfem cedu ccci cvasc cgastro ;
+lr ON delyes*-.208 (del_lr);
+lr ON cage crace cfem cedu ccci cvasc cgastro ;
+i ON cage crace cfem cedu ccci cvasc cgastro ; 
+
+delyes ON i*-.077;
+delyes ON cage crace cfem cedu ccci cvasc cgastro ; 
+
+!constrain intercepts
+
+[rehosp1] (rhi);
+[rehosp2] (rhi);
+[rehosp6] (rhi6);
+[rehosp12] (rhi6);
+[rehosp18] (rhi6);
+[rehosp24] (rhi6);
+[rehosp30] (rhi6);
+[rehosp36] (rhi6);
+[rehosp48] (rhi12);
+[rehosp60] (rhi12);
+
+!rehosp and GCP contemporaneous 
+
+y1 ON rehosp1 (rh);
+y2 ON rehosp2 (rh);
+y6 ON rehosp6 (rh);
+y12 ON rehosp12 (rh);
+y18 ON rehosp18 (rh);
+y24 ON rehosp24 (rh);
+y30 ON rehosp30 (rh);
+y36 ON rehosp36 (rh);
+y48 ON rehosp48 (rh);
+y60 ON rehosp60 (rh);
+
+!rehosp and GCP lagged (1-back)
+
+y2 ON rehosp1 (rhl);
+y6 ON rehosp2 (rhl);
+y12 ON rehosp6 (rhl);
+y18 ON rehosp12 (rhl);
+y24 ON rehosp18 (rhl);
+y30 ON rehosp24 (rhl);
+y36 ON rehosp30 (rhl);
+y48 ON rehosp36 (rhl);
+y60 ON rehosp48 (rhl);
+
+!rehosp and GCP lagged (2-back) 
+
+y6 ON rehosp1 (rhll);
+y12 ON rehosp2 (rhll);
+y18 ON rehosp6 (rhll);
+y24 ON rehosp12 (rhll);
+y30 ON rehosp18 (rhll);
+y36 ON rehosp24 (rhll);
+y48 ON rehosp30 (rhll);
+y60 ON rehosp36 (rhll);
+
+! account for empty cells
+
+rehosp@1;
+rehosp BY rehosp1* (d);
+rehosp BY rehosp2 (d);
+rehosp BY rehosp6 (d);
+rehosp BY rehosp12 (d);
+rehosp BY rehosp18 (d);
+rehosp BY rehosp24 (d);
+rehosp BY rehosp30 (d);
+rehosp BY rehosp36 (d);
+rehosp BY rehosp48 (d);
+rehosp BY rehosp60 (d);
+
+rehosp with s@0;
+rehosp with p@0;
+rehosp with r@0;
+rehosp with lr@0;
+rehosp with i;
+
+rehosp on cage;
+rehosp on crace;
+rehosp on cfem;
+rehosp on cedu;
+rehosp on ccci;
+rehosp on cvasc;
+rehosp on cgastro;
+rehosp on delyes;
+
+
+",
+  
+  MODELCONSTRAINT = "
+new(totalrh, mar1, mar2, mar6, mar12, mar18
+mar24, mar30, mar36, mar48,
+medianef, worstef,
+
+y0_nd, y1_nd, y2_nd, y6_nd, y12_nd, y18_nd,
+y24_nd, y30_nd, y36_nd, y48_nd, y60_nd,
+y0_d, y1_d, y2_d, y6_d, y12_d, y18_d,
+y24_d, y30_d, y36_d, y48_d, y60_d);
+    
+totalrh = rh + rhl + rhll;
+mar1 = totalrh/9;
+mar2 = totalrh/8;
+mar6 = totalrh/7;
+mar12 = totalrh/6;
+mar18 = totalrh/5;
+mar24 = totalrh/4;
+mar30 = totalrh/3;
+mar36 = totalrh/2;
+mar48 = (rh+rhl)/1;
+
+medianef = mar6*2 + mar24*2;
+worstef = mar1*1 + mar2*2 + mar6*2 + mar12*5 + mar18*1 +
+mar24*7 + mar30*1 + mar36*3 + mar48*4;
+
+y0_nd = i*1 + s*0   + p*0 + r*0 + lr*0;
+y1_nd = i*1 + s*.083  + p*1 + r*0 + lr*0;
+y2_nd = i*1 + s*.167 + p*1 + r*1 + lr*0;
+y6_nd = i*1 + s*.5  + p*1 + r*1 + lr*.2;
+y12_nd = i*1 + s*1   + p*1 + r*1 + lr*.507;
+y18_nd = i*1 + s*1.5 + p*1 + r*1 + lr*.79;
+y24_nd = i*1 + s*2   + p*1 + r*1 + lr*.963;
+y30_nd = i*1 + s*2.5 + p*1 + r*1 + lr*1;
+y36_nd = i*1 + s*3   + p*1 + r*1 + lr*1;
+y48_nd = i*1 + s*4   + p*1 + r*1 + lr*1;
+y60_nd = i*1 + s*5   + p*1 + r*1 + lr*1;
+
+y0_d  = (i)*1+(s+del_s)*0 +(p+del_p)*0+(r+del_r)*0+(lr+del_lr)*0;
+y1_d  = (i)*1+(s+del_s)*.083+(p+del_p)*1+(r+del_r)*0+(lr+del_lr)*0;
+y2_d  = (i)*1+(s+del_s)*.167+(p+del_p)*1+(r+del_r)*1+(lr+del_lr)*0;
+y6_d  = (i)*1+(s+del_s)*.5+(p+del_p)*1+(r+del_r)*1+(lr+del_lr)*.181;
+y12_d = (i)*1+(s+del_s)*1 +(p+del_p)*1+(r+del_r)*1+(lr+del_lr)*.524;
+y18_d = (i)*1+(s+del_s)*1.5+(p+del_p)*1+(r+del_r)*1+(lr+del_lr)*1;
+y24_d = (i)*1+(s+del_s)*2 +(p+del_p)*1+(r+del_r)*1+(lr+del_lr)*1;
+y30_d = (i)*1+(s+del_s)*2.5+(p+del_p)*1+(r+del_r)*1+(lr+del_lr)*1;
+y36_d = (i)*1+(s+del_s)*3 +(p+del_p)*1+(r+del_r)*1+(lr+del_lr)*1;
+y48_d = (i)*1+(s+del_s)*4 +(p+del_p)*1+(r+del_r)*1+(lr+del_lr)*1;
+y60_d = (i)*1+(s+del_s)*5 +(p+del_p)*1+(r+del_r)*1+(lr+del_lr)*1;
+
+
+",
+  
+usevariables = colnames(rehosp_analysis_data),
+  
+VARIABLE = "idvariable = mplusid;
+            tscores = t0 t1 t2 t6 t12 t18 t24 t30 t36 t48 t60;
+            CATEGORICAL ARE delyes;",
+  
+OUTPUT = "CINTERVAL;
+          TECH4;",
+  
+ANALYSIS = "ESTIMATOR = MLR;
+            TYPE = RANDOM;
+            INTEGRATION=MONTECARLO;",
+  
+rdata = rehosp_analysis_data,
+  
+SAVEDATA = "FILE IS rehospmodel.dat;
+            SAVE is fscores;
+            FORMAT IS free;"
+)
+
+modelrehosp_output <- mplusModeler(modelrehosp_mpluscode, modelout = "modelrehosp.inp", run = TRUE)
