@@ -1,0 +1,239 @@
+modelcombo_mpluscode <- mplusObject(
+  MODEL = "
+i s | y0 y1 y2 y6 y12 y18 y24 y30 y36 AT t0 t1 t2 t6 t12 t18 t24 t30 t36;
+i s | y48 y60 AT  t48 t60;
+p  BY  y0@0 y1@1 y2@1 y6@1 y12@1 y18@1 y24@1 y30@1 y36@1 y48@1 y60@1;
+r  BY  y0@0 y1@0 y2@1 y6@1 y12@1 y18@1 y24@1 y30@1 y36@1 y48@1 y60@1;
+lr BY  y0@0 y1@0 y2@0 y6@.181 y12@.524 y18@1 y24@1 y30@1 y36@1 y48@1 y60@1;
+
+[i*57.603] (i);
+[s*-.98] (s);
+[p*-.348] (p);
+[r*1.095] (r);
+[lr*1.927] (lr);
+p@0;
+r@0;
+lr*4.638;
+s with i*.875;
+i with p@0;
+i with r@0;
+i with lr@0;
+s with p@0;
+s with r@0;
+s with lr*-2.01;
+
+r with p@0;
+lr with p@0 ;
+lr with r@0 ;
+
+s ON delyes*-.337 (del_s);
+s ON cage*-0.05410;
+s ON crace*0.16315;
+s ON cfem*-0.08293;
+s ON cedu;
+s on cvasc;
+s on cgastro;
+s on ccci;
+
+p ON delyes*-1.034 (del_p);
+p ON cage*-0.03461;
+p ON crace*.013; ! has to be constrained for this model to be identified
+p ON cfem*0.23039;
+p ON cedu;
+p on cvasc;
+p on cgastro;
+p on ccci;
+
+r ON delyes*1.021 (del_r);
+r ON cage*0.01246;
+r ON crace*-0.29761;
+r ON cfem*-0.25461;
+r ON cedu;
+r on cvasc;
+r on cgastro;
+r on ccci;
+
+lr ON delyes*-.057 (del_lr);
+lr ON cage*0.03352;
+lr ON crace*0.05193;
+lr ON cfem*0.30274;
+lr ON cedu;
+lr on cvasc;
+lr on cgastro;
+lr on ccci;
+
+i ON cage*-0.46053;
+i ON crace*-8.51150;
+i ON cfem*0.78194;
+i ON cedu;
+i on cvasc;
+i on cgastro;
+i on ccci;
+
+
+delyes ON i*-.07;
+delyes ON cage*.01;
+delyes ON crace*-.19;
+delyes ON cfem*.24;
+delyes ON cedu;
+delyes on cvasc;
+delyes on cgastro;
+delyes on ccci;
+
+
+!constrain intercepts
+
+[combo1] (rhi);
+[combo2] (rhi);
+[combo6] (rhi6);
+[combo12] (rhi6);
+[combo18] (rhi6);
+[combo24] (rhi6);
+[combo30] (rhi6);
+[combo36] (rhi6);
+[combo48] (rhi12);
+[combo60] (rhi12);
+
+!rehosp and GCP contemporaneous 
+
+y1 ON combo1 (rh);
+y2 ON combo2 (rh);
+y6 ON combo6 (rh);
+y12 ON combo12 (rh);
+y18 ON combo18 (rh);
+y24 ON combo24 (rh);
+y30 ON combo30 (rh);
+y36 ON combo36 (rh);
+y48 ON combo48 (rh);
+y60 ON combo60 (rh);
+
+!rehosp and GCP lagged (1-back)
+
+y2 ON combo1 (rhl);
+y6 ON combo2 (rhl);
+y12 ON combo6 (rhl);
+y18 ON combo12 (rhl);
+y24 ON combo18 (rhl);
+y30 ON combo24 (rhl);
+y36 ON combo30 (rhl);
+y48 ON combo36 (rhl);
+y60 ON combo48 (rhl);
+
+!rehosp and GCP lagged (2-back) 
+
+y6 ON combo1 (rhll);
+y12 ON combo2 (rhll);
+y18 ON combo6 (rhll);
+y24 ON combo12 (rhll);
+y30 ON combo18 (rhll);
+y36 ON combo24 (rhll);
+y48 ON combo30 (rhll);
+y60 ON combo36 (rhll);
+
+! account for empty cells
+
+combo@1;
+combo BY combo1* (drh);
+combo BY combo2 (drh);
+combo BY combo6 (drh);
+combo BY combo12 (drh);
+combo BY combo18 (drh);
+combo BY combo24 (drh);
+combo BY combo30 (drh);
+combo BY combo36 (drh);
+combo BY combo48 (drh);
+combo BY combo60 (drh);
+
+combo with s@0;
+combo with p@0;
+combo with r@0;
+combo with lr@0;
+combo with i;
+
+combo on cage;
+combo on crace;
+combo on cfem;
+combo on cedu;
+combo on ccci;
+combo on cvasc;
+combo on cgastro;
+combo on delyes;
+
+
+",
+  
+  MODELCONSTRAINT = "
+new(totalrh, mar1, mar2, mar6, mar12, mar18
+mar24, mar30, mar36, mar48,
+medianef, worstef,
+
+y0_nd, y1_nd, y2_nd, y6_nd, y12_nd, y18_nd,
+y24_nd, y30_nd, y36_nd, y48_nd, y60_nd,
+y0_d, y1_d, y2_d, y6_d, y12_d, y18_d,
+y24_d, y30_d, y36_d, y48_d, y60_d);
+    
+totalrh = rh + rhl + rhll;
+mar1 = totalrh/9;
+mar2 = totalrh/8;
+mar6 = totalrh/7;
+mar12 = totalrh/6;
+mar18 = totalrh/5;
+mar24 = totalrh/4;
+mar30 = totalrh/3;
+mar36 = totalrh/2;
+mar48 = (rh+rhl)/1;
+
+medianef = mar6*2 + mar24*2;
+worstef = mar1*1 + mar2*2 + mar6*2 + mar12*5 + mar18*1 +
+mar24*7 + mar30*1 + mar36*3 + mar48*4;
+
+y0_nd = i*1 + s*0   + p*0 + r*0 + lr*0;
+y1_nd = i*1 + s*.083  + p*1 + r*0 + lr*0;
+y2_nd = i*1 + s*.167 + p*1 + r*1 + lr*0;
+y6_nd = i*1 + s*.5  + p*1 + r*1 + lr*.2;
+y12_nd = i*1 + s*1   + p*1 + r*1 + lr*.507;
+y18_nd = i*1 + s*1.5 + p*1 + r*1 + lr*.79;
+y24_nd = i*1 + s*2   + p*1 + r*1 + lr*.963;
+y30_nd = i*1 + s*2.5 + p*1 + r*1 + lr*1;
+y36_nd = i*1 + s*3   + p*1 + r*1 + lr*1;
+y48_nd = i*1 + s*4   + p*1 + r*1 + lr*1;
+y60_nd = i*1 + s*5   + p*1 + r*1 + lr*1;
+
+y0_d  = (i)*1+(s+del_s)*0 +(p+del_p)*0+(r+del_r)*0+(lr+del_lr)*0;
+y1_d  = (i)*1+(s+del_s)*.083+(p+del_p)*1+(r+del_r)*0+(lr+del_lr)*0;
+y2_d  = (i)*1+(s+del_s)*.167+(p+del_p)*1+(r+del_r)*1+(lr+del_lr)*0;
+y6_d  = (i)*1+(s+del_s)*.5+(p+del_p)*1+(r+del_r)*1+(lr+del_lr)*.181;
+y12_d = (i)*1+(s+del_s)*1 +(p+del_p)*1+(r+del_r)*1+(lr+del_lr)*.524;
+y18_d = (i)*1+(s+del_s)*1.5+(p+del_p)*1+(r+del_r)*1+(lr+del_lr)*1;
+y24_d = (i)*1+(s+del_s)*2 +(p+del_p)*1+(r+del_r)*1+(lr+del_lr)*1;
+y30_d = (i)*1+(s+del_s)*2.5+(p+del_p)*1+(r+del_r)*1+(lr+del_lr)*1;
+y36_d = (i)*1+(s+del_s)*3 +(p+del_p)*1+(r+del_r)*1+(lr+del_lr)*1;
+y48_d = (i)*1+(s+del_s)*4 +(p+del_p)*1+(r+del_r)*1+(lr+del_lr)*1;
+y60_d = (i)*1+(s+del_s)*5 +(p+del_p)*1+(r+del_r)*1+(lr+del_lr)*1;
+
+
+",
+  
+  
+  usevariables = colnames(combo_analysis_data),
+  
+  VARIABLE = "idvariable = mplusid;
+            tscores = t0 t1 t2 t6 t12 t18 t24 t30 t36 t48 t60;
+            CATEGORICAL ARE delyes;",
+  
+  OUTPUT = "CINTERVAL;
+          TECH4;
+          STANDARDIZED;",
+  
+  ANALYSIS = "ESTIMATOR = MLR;
+            TYPE = RANDOM;
+            INTEGRATION=MONTECARLO(1500);",
+  
+  rdata = combo_analysis_data,
+  
+  SAVEDATA = "FILE IS icumodel.dat;
+            SAVE is fscores;
+            FORMAT IS free;"
+)
+
+modelcombo_output <- mplusModeler(modelcombo_mpluscode, modelout = "modelcombo.inp", run = TRUE)
